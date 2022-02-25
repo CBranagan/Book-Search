@@ -9,13 +9,15 @@ const resolvers = {
     users: async (parent, args) => {
       return User.find({}).select("-__v").populate("books");
     },
-    me: async (parent, { email, password }, context) => {
-      return User.findOne({ email, password }).select("-__v").populate("books");
+    me: async (parent, { email }, context) => {
+      return await User.findOne({ email: email })
+        .select("-__v")
+        .populate("books");
     },
   },
   Mutation: {
     login: async (parent, { email, password }) => {
-      const user = await User.findOne({ email: email });
+      const user = await User.findOne({ email: email }).populate("books");
 
       if (!user) {
         throw new AuthenticationError("Incorrect name credentials");
@@ -43,11 +45,11 @@ const resolvers = {
     },
     saveBook: async (
       parent,
-      { user, title, authors, description, bookId, image, link },
+      { email, title, authors, description, bookId, image },
       context
     ) => {
       return await User.findOneAndUpdate(
-        { _id: user },
+        { email: email },
         {
           $push: {
             savedBooks: {
@@ -56,16 +58,15 @@ const resolvers = {
               description,
               bookId,
               image,
-              link,
             },
           },
         },
         { new: true }
       );
     },
-    removeBook: async (parent, { user, bookId }, context) => {
+    removeBook: async (parent, { email, bookId }, context) => {
       return await User.findOneAndUpdate(
-        { _id: user },
+        { email: email },
         { $pull: { savedBooks: { bookId: bookId } } },
         { new: true }
       );

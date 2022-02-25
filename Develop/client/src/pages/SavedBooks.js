@@ -15,7 +15,7 @@ import auth from "../utils/auth";
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
-  const [getMe, { data, error, loading }] = useLazyQuery(GET_ME);
+  const [getMe, { data, error }] = useLazyQuery(GET_ME);
   const [removeBook, { bootData, bootError }] = useMutation(REMOVE_BOOK);
 
   // use this to determine if `useEffect()` hook needs to run again
@@ -26,19 +26,23 @@ const SavedBooks = () => {
       try {
         const token = Auth.loggedIn() ? Auth.getToken() : null;
 
+        const email = Auth.getProfile().data.email;
+        console.log(email);
+
         if (!token) {
           return false;
         }
 
-        const response = await getMe({ variables: { _id: auth.user._id } });
-        const userData = data;
+        const response = await getMe({ variables: { email: email } });
+        console.log(response.data.me);
 
-        if (!response.ok) {
-          throw new Error("something went wrong!");
-        }
+        // if (!response.ok) {
+        //   throw new Error("something went wrong!");
+        // }
 
-        // const user = await response.json();
-        setUserData(userData);
+        const user = response.data.me;
+        console.log(user);
+        setUserData(user);
       } catch (err) {
         console.error(err);
       }
@@ -51,21 +55,25 @@ const SavedBooks = () => {
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
+    const email = Auth.getProfile().data.email;
+
     if (!token) {
       return false;
     }
 
     try {
       const response = await removeBook({
-        _id: auth.user._id,
-        bookId: bookId,
+        variables: {
+          email: email,
+          bookId: bookId,
+        },
       });
 
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
-
-      const updatedUser = await response.json();
+      // if (!response.ok) {
+      //   throw new Error("something went wrong!");
+      // }
+      console.log(response.data.removeBook);
+      const updatedUser = response.data.removeBook;
       setUserData(updatedUser);
       // upon success, remove book's id from localStorage
       removeBookId(bookId);

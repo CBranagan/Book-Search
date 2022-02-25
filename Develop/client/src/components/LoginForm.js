@@ -35,13 +35,13 @@ const LoginForm = () => {
           password: userFormData.password,
         },
       });
-
+      
       // if (!response.ok) {
       //   throw new Error("something went wrong!");
       // }
 
-      const { token, user } = await response;
-      console.log(user);
+      const { token, user } = response.data.login;
+      
       Auth.login(token);
     } catch (err) {
       console.error(err);

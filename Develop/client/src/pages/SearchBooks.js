@@ -74,7 +74,7 @@ const SearchBooks = () => {
 
     Auth.getProfile(token);
 
-    console.log(Auth.loggedIn());
+    const email = Auth.getProfile().data.email;
 
     if (!token) {
       return false;
@@ -83,18 +83,18 @@ const SearchBooks = () => {
     try {
       const response = await saveBook({
         variables: {
+          email: email,
           authors: bookToSave.authors,
           description: bookToSave.description,
           title: bookToSave.title,
           bookId: bookId,
           image: bookToSave.image,
-          link: bookToSave.link,
         },
       });
 
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
+      // if (!response.ok) {
+      //   throw new Error("something went wrong!");
+      // }
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
@@ -157,7 +157,13 @@ const SearchBooks = () => {
                         (savedBookId) => savedBookId === book.bookId
                       )}
                       className="btn-block btn-info"
-                      onClick={() => handleSaveBook(book.bookId, book.authors)}
+                      onClick={() =>
+                        handleSaveBook(
+                          book.bookId,
+                          book.authors,
+                          book.description
+                        )
+                      }
                     >
                       {savedBookIds?.some(
                         (savedBookId) => savedBookId === book.bookId

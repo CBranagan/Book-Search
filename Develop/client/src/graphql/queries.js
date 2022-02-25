@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const GET_ME = gql`
-  query getMe($email: email) {
+  query getMe($email: String!) {
     me(email: $email) {
       _id
       username
@@ -13,7 +13,6 @@ export const GET_ME = gql`
         description
         title
         image
-        link
       }
     }
   }
